@@ -1,0 +1,153 @@
+
+.seccion-vehiculos {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.encabezado-vehiculos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.titulo-vehiculos {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.boton-nuevo-vehiculo {
+    background-color: #0f172a; 
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.boton-nuevo-vehiculo:hover {
+    opacity: 0.9;
+}
+
+.contenedor-tabla-vehiculos {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    overflow-x: auto;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.tabla-flota {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 800px;
+}
+
+.head-flota {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.th-flota {
+    padding: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* Filas */
+.fila-flota {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.fila-flota:hover {
+    background-color: #f8fafc;
+}
+
+.td-flota {
+    padding: 1rem;
+    font-size: 0.95rem;
+    color: #334155;
+    vertical-align: middle;
+}
+
+
+.texto-placa {
+    font-family: 'Poppins', monospace; 
+    font-weight: 700;
+    background-color: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+}
+
+.texto-marca {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.texto-modelo {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.etiqueta-servicio {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.servicio-normal {
+    background-color: #eff6ff; 
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+}
+
+.servicio-premium {
+    background-color: #f3e8ff; 
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+
+.servicio-urgente {
+    background-color: #fee2e2; 
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Acciones */
+.acciones-vehiculo {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-accion-v {
+    padding: 0.4rem;
+    border-radius: 0.375rem;
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-accion-v:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-eliminar:hover {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}

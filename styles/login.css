@@ -1,0 +1,131 @@
+
+.contenedor-login {
+    min-height: 100vh; 
+    display: flex;
+    align-items: center;     
+    justify-content: center; 
+    padding: 1rem;
+}
+
+.tarjeta-login {
+    background-color: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.encabezado-login {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.contenedor-marca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.icono-marca {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.nombre-marca {
+    font-size: 1.75rem;
+    color: #0f172a;
+}
+
+.titulo-bienvenida {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.subtitulo-login {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.grupo-formulario {
+    margin-bottom: 1.25rem;
+}
+
+.etiqueta {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+.contenedor-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icono-input {
+    position: absolute;
+    left: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0.5;
+}
+
+.campo-entrada {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem; 
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    color: #0f172a;
+    transition: all 0.2s;
+}
+
+.campo-entrada:focus {
+    outline: none;
+    border-color: #0f172a; 
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+}
+
+.opciones-formulario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.recordarme {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.enlace-olvido {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.enlace-olvido:hover {
+    text-decoration: underline;
+}
+
+.pie-login {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.enlace-registro {
+    color: #0f172a;
+    font-weight: 600;
+}
