@@ -2,7 +2,7 @@
 
 $DB_TIPO = 'mysql'; 
 $DB_HOST = 'localhost'; // Normalmente es 'localhost' si usas XAMPP/WAMP/etc.
-$DB_NOMBRE = 'moviapp'; // Nombre de tu base de datos.
+$DB_NOMBRE = 'BDA'; // Nombre de tu base de datos.
 $DB_USUARIO = 'root'; // Usuario de la BD. CÁMBIALO para producción.
 $DB_PASSWORD = ''; // Contraseña de la BD. CÁMBIALA para producción.
 $DB_CHARSET = 'utf8mb4';

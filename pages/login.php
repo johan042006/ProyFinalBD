@@ -1,19 +1,61 @@
+<?php
+session_start();
+
+// Si ya hay una sesión activa, redirigir a home.php
+if (isset($_SESSION['user_id'])) {
+    header("Location: home.php");
+    exit();
+}
+
+include '../includes/conexion.php';
+
+$error_message = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre_usuario = $_POST['nombre_usuario'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    if (empty($nombre_usuario) || empty($password)) {
+        $error_message = "Por favor, ingresa tu usuario y contraseña.";
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM USUARIO WHERE nombre_usuario = ?");
+        $stmt->execute([$nombre_usuario]);
+        $usuario = $stmt->fetch();
+
+        // Verificar si el usuario existe, si la contraseña es correcta y si el usuario está activo
+        if ($usuario && password_verify($password, $usuario['contraseña'])) {
+            if ($usuario['estado'] == 'activo') {
+                // Regenerar ID de sesión para seguridad
+                session_regenerate_id(true);
+
+                // Guardar datos de sesión
+                $_SESSION['user_id'] = $usuario['id_usuario'];
+                $_SESSION['user_name'] = $usuario['nombre_usuario'];
+                $_SESSION['user_role'] = $usuario['rol'];
+                
+                header("Location: home.php");
+                exit();
+            } else {
+                $error_message = "Tu cuenta ha sido desactivada. Contacta al administrador.";
+            }
+        } else {
+            $error_message = "Usuario o contraseña incorrectos.";
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | MoviApp</title>
-    
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/login.css">
 </head>
 <body>
-
     <div class="contenedor-login">
-        
         <main class="tarjeta-login">
-            
             <div class="encabezado-login">
                 <div class="contenedor-marca">
                     <img src="https://api.iconify.design/lucide-car.svg?color=%230f172a" alt="Logo MoviApp" class="icono-marca">
@@ -23,13 +65,18 @@
                 <p class="subtitulo-login">Ingresa tus datos para continuar</p>
             </div>
 
-            <form action="home.php" method="GET"> 
-                
+            <?php if (!empty($error_message)): ?>
+                <div class="alerta-error" style="padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
+                    <?php echo $error_message; ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="login.php" method="POST">
                 <div class="grupo-formulario">
-                    <label for="email" class="etiqueta">Correo electrónico</label>
+                    <label for="nombre_usuario" class="etiqueta">Nombre de Usuario</label>
                     <div class="contenedor-input">
-                        <img src="https://api.iconify.design/lucide-mail.svg?color=%230f172a" class="icono-input" alt="icono correo">
-                        <input type="email" id="email" name="email" class="campo-entrada" placeholder="ejemplo@correo.com" required>
+                        <img src="https://api.iconify.design/lucide-user.svg?color=%230f172a" class="icono-input" alt="icono usuario">
+                        <input type="text" id="nombre_usuario" name="nombre_usuario" class="campo-entrada" placeholder="Tu nombre de usuario" required>
                     </div>
                 </div>
 
@@ -41,26 +88,11 @@
                     </div>
                 </div>
 
-                <div class="opciones-formulario">
-                    <label class="recordarme">
-                        <input type="checkbox">
-                        <span>Recordarme</span>
-                    </label>
-                    <a href="#" class="enlace-olvido">¿Olvidaste tu contraseña?</a>
-                </div>
-
                 <button type="submit" class="boton-primario">
                     Iniciar Sesión
                 </button>
-
             </form>
-
-            <div class="pie-login">
-                ¿No tienes una cuenta? <a href="#" class="enlace-registro">Regístrate gratis</a>
-            </div>
-
         </main>
     </div>
-
 </body>
 </html>
