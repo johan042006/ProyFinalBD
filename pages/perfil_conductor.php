@@ -86,8 +86,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// --- Lógica para obtener datos del conductor logueado ---
-$stmt = $pdo->prepare("SELECT c.*, t.numero AS telefono FROM CONDUCTOR c LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor WHERE c.id_usuario = ?");
+// --- Lógica para obtener datos del conductor logueado y su vehículo ---
+$stmt = $pdo->prepare("
+    SELECT 
+        c.*, 
+        t.numero AS telefono,
+        v.placa AS vehiculo_placa,
+        v.marca AS vehiculo_marca,
+        v.modelo AS vehiculo_modelo,
+        v.capacidad_acompaniantes AS vehiculo_capacidad,
+        ts.tipo AS vehiculo_tipo_servicio
+    FROM CONDUCTOR c 
+    LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor 
+    LEFT JOIN VEHICULO v ON c.id_conductor = v.id_conductor_titular
+    LEFT JOIN TIPO_SERVICIO ts ON v.id_tipo = ts.id_tipo
+    WHERE c.id_usuario = ?
+");
 $stmt->execute([$id_usuario_logueado]);
 $conductor_perfil = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -244,6 +258,34 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
                                 <?php endif; ?>
                             </div>
                         </div>
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e2e8f0;">
+                    <h2 class="texto-titulo" style="margin-bottom: 1rem; text-align: center;">Información del Vehículo</h2>
+                    <div class="form-grid">
+                        <?php if ($conductor_perfil['vehiculo_placa']): ?>
+                            <div class="form-group">
+                                <label>Placa</label>
+                                <input type="text" value="<?php echo htmlspecialchars($conductor_perfil['vehiculo_placa']); ?>" readonly class="campo-entrada">
+                            </div>
+                            <div class="form-group">
+                                <label>Marca</label>
+                                <input type="text" value="<?php echo htmlspecialchars($conductor_perfil['vehiculo_marca']); ?>" readonly class="campo-entrada">
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo</label>
+                                <input type="text" value="<?php echo htmlspecialchars($conductor_perfil['vehiculo_modelo']); ?>" readonly class="campo-entrada">
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Servicio</label>
+                                <input type="text" value="<?php echo htmlspecialchars($conductor_perfil['vehiculo_tipo_servicio']); ?>" readonly class="campo-entrada">
+                            </div>
+                            <div class="form-group">
+                                <label>Capacidad Acompañantes</label>
+                                <input type="text" value="<?php echo htmlspecialchars($conductor_perfil['vehiculo_capacidad']); ?>" readonly class="campo-entrada">
+                            </div>
+                        <?php else: ?>
+                            <p class="form-full-width" style="text-align: center;">No tienes un vehículo registrado. <a href="registrar_vehiculo_conductor.php">Registra uno aquí.</a></p>
+                        <?php endif; ?>
+                    </div>
                         <div class="form-actions">
                             <a href="home.php" class="boton-secundario">Volver</a>
                             <button type="submit" class="boton-primario">Guardar Cambios</button>

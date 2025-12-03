@@ -220,7 +220,8 @@ CREATE TABLE `VEHICULO` (
   `modelo` int(11) NOT NULL,
   `id_tipo` int(11) NOT NULL,
   `id_conductor_titular` varchar(20) NOT NULL,
-  `estado` enum('activo','inactivo') NOT NULL DEFAULT 'activo'
+  `estado` enum('activo','inactivo') NOT NULL DEFAULT 'activo',
+  `capacidad_acompaniantes` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -259,6 +260,54 @@ INSERT INTO `TARIFA_BASE` (`id_tarifa`, `tarifa_base_valor`, `fecha_vigencia`) V
 
 INSERT INTO `CLIENTE` (`id_cliente`, `nombre`, `direccion`, `id_genero`, `id_nacionalidad`, `id_usuario`) VALUES
 ('11223344', 'Cliente de Prueba', 'Calle Falsa 123', 1, 1, 1);
+
+--
+-- Volcado de datos de prueba adicionales
+--
+
+-- Usuarios de prueba
+INSERT INTO `USUARIO` (`id_usuario`, `nombre_usuario`, `contraseña`, `rol`, `estado`) VALUES
+(2, 'conductor1', 'password', 'conductor', 'activo'),
+(3, 'cliente1', 'password', 'cliente', 'activo');
+
+-- Conductores de prueba
+INSERT INTO `CONDUCTOR` (`id_conductor`, `nombre`, `direccion`, `fotografia`, `id_genero`, `id_nacionalidad`, `id_usuario`) VALUES
+('C001', 'Carlos Driver', 'Av. Siempre Viva 742', 'uploads/fotos_conductores/default_driver.png', 1, 1, 2);
+
+-- Clientes de prueba
+INSERT INTO `CLIENTE` (`id_cliente`, `nombre`, `direccion`, `id_genero`, `id_nacionalidad`, `id_usuario`) VALUES
+('CL001', 'Ana Clienta', 'Calle Luna, Calle Sol 1', 2, 1, 3);
+
+-- Teléfonos de prueba
+INSERT INTO `TELEFONO` (`id_telefono`, `numero`, `id_cliente`, `id_conductor`) VALUES
+(1, '3001112233', NULL, 'C001'),
+(2, '3104445566', 'CL001', NULL);
+
+-- Vehículos de prueba
+INSERT INTO `VEHICULO` (`placa`, `marca`, `modelo`, `id_tipo`, `id_conductor_titular`, `estado`, `capacidad_acompaniantes`) VALUES
+('ABC123', 'Chevrolet', 2020, 1, 'C001', 'activo', 4);
+
+-- Servicios de prueba
+INSERT INTO `SERVICIO` (`id_servicio`, `fecha_solicitud`, `estado`, `valor_total`, `id_cliente`, `id_conductor`, `placa_vehiculo`, `id_tipo`, `id_categoria`, `id_tarifa`) VALUES
+(1, '2025-12-01 10:00:00', 'solicitado', 5000.00, 'CL001', NULL, NULL, 1, 1, 1),
+(2, '2025-12-01 11:00:00', 'asignado', 5750.00, 'CL001', 'C001', 'ABC123', 1, 2, 1),
+(3, '2025-12-01 12:00:00', 'en_ruta', 6500.00, 'CL001', 'C001', 'ABC123', 2, 3, 1),
+(4, '2025-12-01 13:00:00', 'completado', 5000.00, 'CL001', 'C001', 'ABC123', 1, 1, 1);
+
+-- Rutas de servicio de prueba
+INSERT INTO `RUTA_SERVICIO` (`id_ruta`, `id_servicio`, `direccion_origen`, `direccion_destino`) VALUES
+(1, 1, 'Origen Cliente 1', 'Destino Cliente 1'),
+(2, 2, 'Origen Cliente 2', 'Destino Cliente 2'),
+(3, 3, 'Origen Cliente 3', 'Destino Cliente 3'),
+(4, 4, 'Origen Cliente 4', 'Destino Cliente 4');
+
+-- Facturas de prueba
+INSERT INTO `FACTURA` (`id_factura`, `id_servicio`, `total`, `fecha_emision`) VALUES
+(1, 4, 5000.00, '2025-12-01');
+
+-- Formas de pago de factura de prueba
+INSERT INTO `FORMAPAGO_FACTURA` (`id_formapago_factura`, `id_factura`, `id_pago`) VALUES
+(1, 1, 1);
 
 --
 -- Índices para tablas volcadas
@@ -566,3 +615,28 @@ BEGIN
 END //
 
 DELIMITER ;
+
+CREATE VIEW vista_resumen_servicios AS
+SELECT
+    s.id_servicio,
+    s.fecha_solicitud,
+    s.estado,
+    s.valor_total,
+    r.direccion_origen,
+    r.direccion_destino,
+    cl.nombre AS nombre_cliente,
+    cl.id_cliente AS id_cliente_resumen,
+    co.nombre AS nombre_conductor,
+    co.id_conductor AS id_conductor_resumen,
+    v.placa AS placa_vehiculo,
+    v.marca AS marca_vehiculo,
+    v.modelo AS modelo_vehiculo,
+    ts.tipo AS tipo_servicio_nombre,
+    cc.nombre_categoria AS categoria_nombre
+FROM SERVICIO s
+JOIN RUTA_SERVICIO r ON s.id_servicio = r.id_servicio
+JOIN CLIENTE cl ON s.id_cliente = cl.id_cliente
+LEFT JOIN CONDUCTOR co ON s.id_conductor = co.id_conductor
+LEFT JOIN VEHICULO v ON s.placa_vehiculo = v.placa
+LEFT JOIN TIPO_SERVICIO ts ON s.id_tipo = ts.id_tipo
+LEFT JOIN CAT_CATEGORIA cc ON s.id_categoria = cc.id_categoria;

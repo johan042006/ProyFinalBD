@@ -1,4 +1,3 @@
-
 .seccion-seguimiento {
     max-width: 1200px;
     margin: 2rem auto;
@@ -165,5 +164,187 @@
     
     .columna-lateral {
         width: 100%;
+    }
+}
+
+/* Nuevos estilos para la lista de servicios y detalle */
+.seccion-seguimiento .titulo-seccion {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.seccion-seguimiento .subtitulo-seccion {
+    font-size: 1.125rem;
+    color: #475569;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.lista-servicios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+.tarjeta-servicio {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.2s ease-in-out;
+}
+.tarjeta-servicio:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.tarjeta-servicio h3 {
+    font-size: 1.25rem;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+.tarjeta-servicio p {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.4;
+}
+.tarjeta-servicio .estado-servicio {
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+    margin-top: 0.5rem;
+    text-transform: capitalize;
+}
+.estado-solicitado { background-color: #fef3c7; color: #b45309; }
+.estado-asignado { background-color: #dbeafe; color: #1e40af; }
+.estado-en_ruta { background-color: #d1fae5; color: #065f46; }
+.estado-en_origen { background-color: #fef3c7; color: #b45309; }
+.estado-en_destino { background-color: #d1fae5; color: #065f46; }
+.estado-completado { background-color: #d1fae5; color: #065f46; }
+.estado-cancelado { background-color: #fee2e2; color: #991b1b; }
+
+.tarjeta-servicio .btn-ver-seguimiento {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #0f172a;
+    color: white;
+    border-radius: 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+.tarjeta-servicio .btn-ver-seguimiento:hover {
+    background-color: #1e293b;
+}
+
+/* Estilos para la vista de detalle del servicio */
+.detalle-servicio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+.detalle-servicio-mapa {
+    grid-column: 1 / -1; /* Ocupa todo el ancho en pantallas pequeñas */
+    height: 400px;
+    background-color: #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative; /* Para posicionar el texto */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #64748b;
+    font-weight: 600;
+    border: 1px solid #cbd5e1; /* Añadir borde */
+}
+.detalle-servicio-mapa img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.detalle-servicio-mapa p {
+    position: absolute;
+    background: rgba(255,255,255,0.9); /* Fondo más sólido */
+    padding: 0.75rem 1rem; /* Más padding */
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra para resaltar */
+    color: #0f172a; /* Color de texto más oscuro */
+    font-weight: 700; /* Más negrita */
+}
+.detalle-servicio-info {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    grid-column: 1 / -1;
+}
+.detalle-servicio-info h3 {
+    font-size: 1.5rem;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+.detalle-servicio-info p {
+    margin-bottom: 0.75rem; /* Más espaciado entre párrafos */
+    line-height: 1.6;
+}
+.detalle-servicio-info strong {
+    color: #0f172a;
+}
+.detalle-servicio-acciones {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center; /* Centrar botones */
+}
+.detalle-servicio-acciones .boton-primario,
+.detalle-servicio-acciones .boton-secundario {
+    flex: 1;
+    min-width: 150px;
+    padding: 0.75rem 1.25rem; /* Ajustar padding */
+    border-radius: 0.75rem; /* Bordes más redondeados */
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    text-align: center; /* Asegurar texto centrado */
+    text-decoration: none; /* Quitar subrayado */
+    display: flex; /* Para centrar contenido si hay icono */
+    align-items: center;
+    justify-content: center;
+}
+.detalle-servicio-acciones .boton-primario:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+.detalle-servicio-acciones .boton-secundario:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.alerta-estado {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .detalle-servicio-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .detalle-servicio-mapa {
+        grid-column: span 1;
+    }
+    .detalle-servicio-info {
+        grid-column: span 1;
     }
 }

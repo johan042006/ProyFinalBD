@@ -102,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (isset($_GET['status']) && $_GET['status'] == 'success') {
     $mensaje_estado = "Configuración actualizada exitosamente.";
 }
+?>
 
 <!DOCTYPE html>
 <html lang="es">

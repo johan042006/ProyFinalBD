@@ -22,10 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute([$nombre_usuario]);
         $usuario = $stmt->fetch();
 
-        // ADVERTENCIA DE SEGURIDAD CRÍTICA:
-        // Esta aplicación está configurada para usar contraseñas en texto plano.
-        // Esto es EXTREMADAMENTE INSEGURO y NO DEBE USARSE EN UN ENTORNO DE PRODUCCIÓN.
-        // Las contraseñas deben ser hasheadas con password_hash() y verificadas con password_verify().
         if ($usuario && $password === $usuario['contraseña']) {
             if ($usuario['estado'] == 'activo') {
                 session_regenerate_id(true);

@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL); // Habilitar todos los reportes de errores
+ini_set('display_errors', 1); // Mostrar errores en la pantalla
 
 $DB_TIPO = 'mysql'; 
 $DB_HOST = 'localhost'; // Normalmente es 'localhost' si usas XAMPP/WAMP/etc.

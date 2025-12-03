@@ -119,6 +119,7 @@ try {
 } catch (Exception $e) {
     $mensaje_estado = "Error en la base de datos: " . $e->getMessage();
 }
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

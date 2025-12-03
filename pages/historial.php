@@ -130,8 +130,8 @@ try {
                                 <span class="costo-viaje">$<?php echo number_format($viaje['valor_total'], 0, ',', '.'); ?></span>
                                 
                                 <div class="acciones-viaje">
-                                    <button class="btn-detalle">Ver detalle</button>
-                                    <button class="btn-detalle">Factura</button>
+                                    <a href="seguimiento.php?service_id=<?php echo urlencode($viaje['id_servicio']); ?>" class="btn-detalle">Ver detalle</a>
+                                    <a href="factura.php?id_servicio=<?php echo urlencode($viaje['id_servicio']); ?>" class="btn-detalle">Factura</a>
                                 </div>
                             </div>
                         </article>

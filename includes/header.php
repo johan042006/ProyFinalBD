@@ -1,7 +1,8 @@
 <?php
 // Asumimos que auth_check.php ya ha iniciado la sesión
 $pagina_actual = basename($_SERVER['PHP_SELF']);
-$rol = $_SESSION['user_role'] ?? '';
+$rol = (string)($_SESSION['user_role'] ?? '');
+$id_usuario_logueado = $_SESSION['user_id'] ?? '';
 ?>
 <header class="barra-navegacion">
     <div class="contenedor-nav">
@@ -28,7 +29,11 @@ $rol = $_SESSION['user_role'] ?? '';
                     <li><a href="home.php" class="enlace-tab <?php echo ($pagina_actual == 'home.php') ? 'activo' : ''; ?>">Home</a></li>
                     <li><a href="historial.php" class="enlace-tab <?php echo ($pagina_actual == 'historial.php') ? 'activo' : ''; ?>">Historial</a></li>
                     <li><a href="seguimiento.php" class="enlace-tab <?php echo ($pagina_actual == 'seguimiento.php') ? 'activo' : ''; ?>">Seguimiento</a></li>
-                    <li><a href="perfil_cliente.php" class="enlace-tab <?php echo ($pagina_actual == 'perfil_cliente.php') ? 'activo' : ''; ?>">Mi Perfil</a></li>
+                    <?php if ($rol === 'conductor'): ?>
+                        <li><a href="perfil_conductor.php" class="enlace-tab <?php echo ($pagina_actual == 'perfil_conductor.php') ? 'activo' : ''; ?>">Mi Perfil</a></li>
+                    <?php elseif ($rol === 'cliente'): ?>
+                        <li><a href="perfil_cliente.php" class="enlace-tab <?php echo ($pagina_actual == 'perfil_cliente.php') ? 'activo' : ''; ?>">Mi Perfil</a></li>
+                    <?php endif; ?>
                     <li><a href="configuracion.php" class="enlace-tab <?php echo ($pagina_actual == 'configuracion.php') ? 'activo' : ''; ?>">Configuración</a></li>
                 <?php endif; ?>
             </ul>
