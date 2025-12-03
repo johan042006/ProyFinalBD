@@ -2,7 +2,7 @@
 include '../includes/auth_check.php';
 include '../includes/conexion.php';
 
-if ($_SESSION['user_role'] !== 'admin') {
+if ($_SESSION['user_role'] !== 'administrador') {
     die("Acceso denegado. Solo los administradores pueden crear servicios.");
 }
 
@@ -55,9 +55,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['crear_servicio'])) {
         );
         $stmt_ruta->execute([$id_servicio_nuevo, $direccion_origen, $direccion_destino]);
 
-        // 4. Confirmar transacción
+        // 4. Insertar en la tabla FACTURA
+        $stmt_factura = $pdo->prepare(
+            "INSERT INTO FACTURA (id_servicio, total, fecha_emision) VALUES (?, ?, CURDATE())"
+        );
+        $stmt_factura->execute([$id_servicio_nuevo, $valor_total]);
+        $id_factura_nueva = $pdo->lastInsertId();
+
+        // 5. Insertar en la tabla FORMAPAGO_FACTURA
+        $formas_pago_seleccionadas = $_POST['formas_pago'] ?? [];
+        if (!empty($formas_pago_seleccionadas)) {
+            foreach ($formas_pago_seleccionadas as $id_pago) {
+                $stmt_formapago = $pdo->prepare(
+                    "INSERT INTO FORMAPAGO_FACTURA (id_factura, id_pago) VALUES (?, ?)"
+                );
+                $stmt_formapago->execute([$id_factura_nueva, $id_pago]);
+            }
+        } else {
+            // Opcional: Manejar caso donde no se selecciona forma de pago
+            // Por ejemplo, lanzar una excepción o establecer un mensaje de error
+            throw new Exception("Debe seleccionar al menos una forma de pago.");
+        }
+
+        // 6. Confirmar transacción
         $pdo->commit();
-        $_SESSION['mensaje_exito'] = "Servicio #$id_servicio_nuevo creado exitosamente con un valor de $valor_total.";
+        $_SESSION['mensaje_exito'] = "Servicio #$id_servicio_nuevo creado exitosamente con un valor de $valor_total. Factura #$id_factura_nueva generada.";
         header("Location: historial.php"); // Redirigir al historial para ver el nuevo servicio
         exit();
 
@@ -76,6 +98,7 @@ try {
     $vehiculos = $pdo->query("SELECT placa, marca, modelo FROM VEHICULO WHERE estado = 'activo' ORDER BY marca")->fetchAll(PDO::FETCH_ASSOC);
     $categorias = $pdo->query("SELECT * FROM CAT_CATEGORIA ORDER BY nombre_categoria")->fetchAll(PDO::FETCH_ASSOC);
     $tipos_servicio = $pdo->query("SELECT * FROM TIPO_SERVICIO ORDER BY tipo")->fetchAll(PDO::FETCH_ASSOC);
+    $formas_pago = $pdo->query("SELECT * FROM CAT_PAGO ORDER BY forma_pago")->fetchAll(PDO::FETCH_ASSOC); // Add this line
 } catch (PDOException $e) {
     die("Error al cargar datos para el formulario: " . $e->getMessage());
 }
@@ -143,6 +166,18 @@ if (isset($_SESSION['mensaje_error'])) {
                 <div class="campo-formulario">
                     <label for="id_categoria">Categoría del Servicio</label>
                     <select id="id_categoria" name="id_categoria" required><option value="">Seleccione...</option><?php foreach ($categorias as $item): ?><option value="<?php echo $item['id_categoria']; ?>"><?php echo htmlspecialchars($item['nombre_categoria']); ?></option><?php endforeach; ?></select>
+                </div>
+
+                <div class="campo-formulario" style="grid-column: 1 / -1;">
+                    <label class="etiqueta">Formas de Pago</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+                        <?php foreach ($formas_pago as $forma): ?>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" name="formas_pago[]" value="<?php echo htmlspecialchars($forma['id_pago']); ?>">
+                                <?php echo htmlspecialchars($forma['forma_pago']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
                 <div class="acciones-formulario" style="grid-column: 1 / -1;">

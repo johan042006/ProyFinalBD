@@ -7,7 +7,7 @@ $view_mode = '';
 $mensaje = '';
 
 // --- LÓGICA DE MANEJO DE FORMULARIOS (SOLO ADMIN) ---
-if ($rol == 'admin' && $_SERVER["REQUEST_METHOD"] == "POST") {
+if ($rol == 'administrador' && $_SERVER["REQUEST_METHOD"] == "POST") {
     
     // --- AGREGAR NUEVO CONDUCTOR Y USUARIO ---
     if (isset($_POST['agregar_conductor'])) {
@@ -17,7 +17,8 @@ if ($rol == 'admin' && $_SERVER["REQUEST_METHOD"] == "POST") {
         $id_genero = $_POST['id_genero'];
         $id_nacionalidad = $_POST['id_nacionalidad'];
         $fotografia_path = null;
-        
+        $telefono = $_POST['telefono']; // Add this line
+
         // El nombre de usuario será su número de identificación
         $nombre_usuario = $id_conductor;
         $default_password = password_hash('password123', PASSWORD_DEFAULT);
@@ -50,6 +51,10 @@ if ($rol == 'admin' && $_SERVER["REQUEST_METHOD"] == "POST") {
             );
             $stmt_driver->execute([$id_conductor, $nombre, $direccion, $fotografia_path, $id_genero, $id_nacionalidad, $id_usuario_nuevo]);
 
+            // 4. Insertar teléfono
+            $stmt_telefono = $pdo->prepare("INSERT INTO TELEFONO (numero, id_conductor) VALUES (?, ?)");
+            $stmt_telefono->execute([$telefono, $id_conductor]);
+
             $pdo->commit();
             $_SESSION['mensaje_exito'] = "Conductor agregado exitosamente. Su usuario es '$nombre_usuario' y la contraseña temporal es 'password123'.";
 
@@ -77,15 +82,16 @@ if ($rol == 'admin' && $_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // --- LÓGICA DE CONSULTA DE DATOS (SEGÚN ROL) ---
-if ($rol == 'admin') {
+if ($rol == 'administrador') {
     $view_mode = 'admin_list';
     try {
         $stmt_conductores = $pdo->query(
-            "SELECT c.id_conductor, c.nombre, c.direccion, c.fotografia, g.nombre_genero, n.nombre_nacionalidad, u.id_usuario
+            "SELECT c.id_conductor, c.nombre, c.direccion, c.fotografia, g.nombre_genero, n.nombre_nacionalidad, u.id_usuario, t.numero AS telefono
              FROM CONDUCTOR c
              JOIN USUARIO u ON c.id_usuario = u.id_usuario
              JOIN CAT_GENERO g ON c.id_genero = g.id_genero
              JOIN CAT_NACIONALIDAD n ON c.id_nacionalidad = n.id_nacionalidad
+             LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor
              WHERE u.estado = 'activo' AND u.rol = 'conductor'
              ORDER BY c.nombre ASC"
         );
@@ -99,11 +105,12 @@ if ($rol == 'admin') {
     $view_mode = 'driver_profile';
     try {
         $stmt = $pdo->prepare(
-            "SELECT c.id_conductor, c.nombre, c.direccion, c.fotografia, g.nombre_genero, n.nombre_nacionalidad, u.estado
+            "SELECT c.id_conductor, c.nombre, c.direccion, c.fotografia, g.nombre_genero, n.nombre_nacionalidad, u.estado, t.numero AS telefono
              FROM CONDUCTOR c
              JOIN USUARIO u ON c.id_usuario = u.id_usuario
              JOIN CAT_GENERO g ON c.id_genero = g.id_genero
              JOIN CAT_NACIONALIDAD n ON c.id_nacionalidad = n.id_nacionalidad
+             LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor
              WHERE c.id_usuario = ?"
         );
         $stmt->execute([$_SESSION['user_id']]);
@@ -173,6 +180,7 @@ if (isset($_SESSION['mensaje_error'])) {
                         <div class="campo-formulario"><label for="id_conductor">Identificación (Será su nombre de usuario)</label><input type="text" id="id_conductor" name="id_conductor" required></div>
                         <div class="campo-formulario"><label for="nombre">Nombre Completo</label><input type="text" id="nombre" name="nombre" required></div>
                         <div class="campo-formulario"><label for="direccion">Dirección</label><input type="text" id="direccion" name="direccion" required></div>
+                        <div class="campo-formulario"><label for="telefono">Teléfono</label><input type="text" id="telefono" name="telefono" required></div>
                         <div class="campo-formulario"><label for="fotografia">Fotografía</label><input type="file" id="fotografia" name="fotografia" accept="image/*"></div>
                         <div class="campo-formulario"><label for="id_genero">Género</label><select id="id_genero" name="id_genero" required><option value="">Seleccione...</option><?php foreach ($generos as $genero): ?><option value="<?php echo $genero['id_genero']; ?>"><?php echo htmlspecialchars($genero['nombre_genero']); ?></option><?php endforeach; ?></select></div>
                         <div class="campo-formulario"><label for="id_nacionalidad">Nacionalidad</label><select id="id_nacionalidad" name="id_nacionalidad" required><option value="">Seleccione...</option><?php foreach ($nacionalidades as $nacionalidad): ?><option value="<?php echo $nacionalidad['id_nacionalidad']; ?>"><?php echo htmlspecialchars($nacionalidad['nombre_nacionalidad']); ?></option><?php endforeach; ?></select></div>
@@ -181,7 +189,7 @@ if (isset($_SESSION['mensaje_error'])) {
                 </div>
                 <div class="contenedor-tabla">
                     <table class="tabla-conductores">
-                        <thead><tr><th class="celda-header">Foto</th><th class="celda-header">Identificación</th><th class="celda-header">Nombre</th><th class="celda-header">Dirección</th><th class="celda-header">Género</th><th class="celda-header">Nacionalidad</th><th class="celda-header">Acciones</th></tr></thead>
+                        <thead><tr><th class="celda-header">Foto</th><th class="celda-header">Identificación</th><th class="celda-header">Nombre</th><th class="celda-header">Dirección</th><th class="celda-header">Teléfono</th><th class="celda-header">Género</th><th class="celda-header">Nacionalidad</th><th class="celda-header">Acciones</th></tr></thead>
                         <tbody>
                             <?php foreach($conductores as $conductor): ?>
                                 <tr>
@@ -189,6 +197,7 @@ if (isset($_SESSION['mensaje_error'])) {
                                     <td class="celda"><?php echo htmlspecialchars($conductor['id_conductor']); ?></td>
                                     <td class="celda texto-destacado"><?php echo htmlspecialchars($conductor['nombre']); ?></td>
                                     <td class="celda"><?php echo htmlspecialchars($conductor['direccion']); ?></td>
+                                    <td class="celda"><?php echo htmlspecialchars($conductor['telefono'] ?? 'N/A'); ?></td>
                                     <td class="celda"><?php echo htmlspecialchars($conductor['nombre_genero']); ?></td>
                                     <td class="celda"><?php echo htmlspecialchars($conductor['nombre_nacionalidad']); ?></td>
                                     <td class="celda">
@@ -196,7 +205,7 @@ if (isset($_SESSION['mensaje_error'])) {
                                             <a href="editar_conductor.php?id=<?php echo htmlspecialchars($conductor['id_conductor']); ?>" class="btn-accion">Editar</a>
                                             <form method="POST" action="conductores.php" onsubmit="return confirm('¿Estás seguro de que quieres desactivar a este conductor?');" style="display:inline;">
                                                 <input type="hidden" name="id_usuario" value="<?php echo htmlspecialchars($conductor['id_usuario']); ?>">
-                                                <button type="submit" name="eliminar_conductor" class="btn-accion btn-rojo">Eliminar</button>
+                                                <button type="submit" name="eliminar_conductor" class="btn-accion btn-rojo">Desactivar</button>
                                             </form>
                                         </div>
                                     </td>
@@ -219,9 +228,10 @@ if (isset($_SESSION['mensaje_error'])) {
                                 <p><strong>Dirección:</strong> <?php echo htmlspecialchars($conductor_perfil['direccion']); ?></p>
                                 <p><strong>Género:</strong> <?php echo htmlspecialchars($conductor_perfil['nombre_genero']); ?></p>
                                 <p><strong>Nacionalidad:</strong> <?php echo htmlspecialchars($conductor_perfil['nombre_nacionalidad']); ?></p>
+                                <p><strong>Teléfono:</strong> <?php echo htmlspecialchars($conductor_perfil['telefono'] ?? 'N/A'); ?></p>
                                 <p><strong>Estado de la cuenta:</strong> <span class="badge <?php echo $conductor_perfil['estado'] == 'activo' ? 'badge-disponible' : 'badge-ocupado'; ?>"><?php echo htmlspecialchars(ucfirst($conductor_perfil['estado'])); ?></span></p>
                                 <br>
-                                <a href="editar_conductor.php?id=<?php echo htmlspecialchars($conductor_perfil['id_conductor']); ?>" class="btn-accion">Editar mi información</a>
+                                <a href="perfil_conductor.php" class="btn-accion">Editar mi información</a>
                             </div>
                         </div>
                     <?php else: ?>
@@ -237,7 +247,7 @@ if (isset($_SESSION['mensaje_error'])) {
     </main>
 
     <script>
-        <?php if ($rol == 'admin'): ?>
+        <?php if ($rol == 'administrador'): ?>
         document.addEventListener('DOMContentLoaded', function() {
             const btnMostrar = document.getElementById('btn-mostrar-formulario');
             const btnCancelar = document.getElementById('btn-cancelar');

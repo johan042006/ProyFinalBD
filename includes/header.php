@@ -13,24 +13,23 @@ $rol = $_SESSION['user_role'] ?? '';
 
         <nav class="nav-tabs-escritorio">
             <ul class="lista-tabs">
-                <!-- Enlaces Comunes -->
-                <li><a href="home.php" class="enlace-tab <?php echo ($pagina_actual == 'home.php') ? 'activo' : ''; ?>">Home</a></li>
-
-                <?php if ($rol == 'admin'): ?>
-                    <!-- Enlaces solo para Admin -->
-                    <li><a href="solicitud.php" class="enlace-tab <?php echo ($pagina_actual == 'solicitud.php') ? 'activo' : ''; ?>">Solicitud</a></li>
-                    <li><a href="seguimiento.php" class="enlace-tab <?php echo ($pagina_actual == 'seguimiento.php') ? 'activo' : ''; ?>">Seguimiento</a></li>
-                    <li><a href="historial.php" class="enlace-tab <?php echo ($pagina_actual == 'historial.php') ? 'activo' : ''; ?>">Historial</a></li>
+                <?php if ($rol == 'administrador'): ?>
+                    <li><a href="home.php" class="enlace-tab <?php echo ($pagina_actual == 'home.php') ? 'activo' : ''; ?>">Home</a></li>
+                    <li><a href="clientes.php" class="enlace-tab <?php echo ($pagina_actual == 'clientes.php') ? 'activo' : ''; ?>">Clientes</a></li>
                     <li><a href="conductores.php" class="enlace-tab <?php echo ($pagina_actual == 'conductores.php') ? 'activo' : ''; ?>">Conductores</a></li>
                     <li><a href="vehiculos.php" class="enlace-tab <?php echo ($pagina_actual == 'vehiculos.php') ? 'activo' : ''; ?>">Vehículos</a></li>
+                    <li><a href="historial.php" class="enlace-tab <?php echo ($pagina_actual == 'historial.php') ? 'activo' : ''; ?>">Historial</a></li>
+                    <li><a href="seguimiento.php" class="enlace-tab <?php echo ($pagina_actual == 'seguimiento.php') ? 'activo' : ''; ?>">Seguimiento</a></li>
                     <li><a href="pagos.php" class="enlace-tab <?php echo ($pagina_actual == 'pagos.php') ? 'activo' : ''; ?>">Pagos</a></li>
                     <li><a href="reportes.php" class="enlace-tab <?php echo ($pagina_actual == 'reportes.php') ? 'activo' : ''; ?>">Reportes</a></li>
                     <li><a href="configuracion.php" class="enlace-tab <?php echo ($pagina_actual == 'configuracion.php') ? 'activo' : ''; ?>">Configuración</a></li>
-                <?php elseif ($rol == 'conductor'): ?>
-                    <!-- Enlaces solo para Conductor -->
-                    <li><a href="seguimiento.php" class="enlace-tab <?php echo ($pagina_actual == 'seguimiento.php') ? 'activo' : ''; ?>">Servicios Asignados</a></li>
-                    <li><a href="historial.php" class="enlace-tab <?php echo ($pagina_actual == 'historial.php') ? 'activo' : ''; ?>">Mi Historial</a></li>
-                    <li><a href="conductores.php" class="enlace-tab <?php echo ($pagina_actual == 'conductores.php') ? 'activo' : ''; ?>">Mi Perfil</a></li>
+                <?php else: ?>
+                    <!-- Enlaces Comunes para otros roles -->
+                    <li><a href="home.php" class="enlace-tab <?php echo ($pagina_actual == 'home.php') ? 'activo' : ''; ?>">Home</a></li>
+                    <li><a href="historial.php" class="enlace-tab <?php echo ($pagina_actual == 'historial.php') ? 'activo' : ''; ?>">Historial</a></li>
+                    <li><a href="seguimiento.php" class="enlace-tab <?php echo ($pagina_actual == 'seguimiento.php') ? 'activo' : ''; ?>">Seguimiento</a></li>
+                    <li><a href="perfil_cliente.php" class="enlace-tab <?php echo ($pagina_actual == 'perfil_cliente.php') ? 'activo' : ''; ?>">Mi Perfil</a></li>
+                    <li><a href="configuracion.php" class="enlace-tab <?php echo ($pagina_actual == 'configuracion.php') ? 'activo' : ''; ?>">Configuración</a></li>
                 <?php endif; ?>
             </ul>
         </nav>

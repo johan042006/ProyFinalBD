@@ -1,7 +1,15 @@
 <?php
-    // Simulamos que esto viene de la base de datos
-    // Puedes cambiar este valor para probar
-    $saldo_actual = 24500; 
+include '../includes/auth_check.php';
+include '../includes/conexion.php';
+
+// --- Verificación de Rol ---
+if ($_SESSION['user_role'] !== 'administrador') {
+    die("Acceso denegado.");
+}
+
+// No hay una tabla de "billetera" en la BD, así que el saldo no se puede calcular.
+// Se deja en 0 como valor por defecto.
+$saldo_actual = 0; 
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +32,7 @@
     <main class="contenido-principal">
         <section class="seccion-pagos">
             
-            <h2 class="titulo-pagos">Métodos de Pago</h2>
+            <h2 class="titulo-pagos">Métodos de Pago de Clientes</h2>
 
             <div class="grid-metodos-pago">
                 

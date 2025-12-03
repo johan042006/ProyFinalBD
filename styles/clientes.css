@@ -1,0 +1,141 @@
+/* styles/clientes.css */
+
+.seccion-clientes {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.contenedor-clientes {
+    text-align: center;
+}
+
+.contenedor-clientes .texto-titulo {
+    font-size: 1.875rem; /* 30px */
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+}
+
+.contenedor-clientes .subtitulo-login {
+    font-size: 1.125rem; /* 18px */
+    color: #475569;
+    margin-bottom: 2rem;
+}
+
+/* Estilos para la tabla de clientes */
+.tabla-clientes {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 0.75rem;
+    overflow: hidden; /* Para que los bordes redondeados se apliquen a la tabla */
+}
+
+.tabla-clientes th,
+.tabla-clientes td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.tabla-clientes th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.tabla-clientes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-clientes tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Estilos para botones de acción en la tabla */
+.boton-accion {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: 1px solid transparent;
+}
+
+.boton-accion.editar {
+    background-color: #2563eb;
+    color: white;
+}
+
+.boton-accion.editar:hover {
+    background-color: #1d4ed8;
+}
+
+.boton-accion.eliminar {
+    background-color: #ef4444;
+    color: white;
+    margin-left: 0.5rem;
+}
+
+.boton-accion.eliminar:hover {
+    background-color: #dc2626;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tabla-clientes {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .tabla-clientes thead, .tabla-clientes tbody, .tabla-clientes th, .tabla-clientes td, .tabla-clientes tr {
+        display: block;
+    }
+
+    .tabla-clientes thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .tabla-clientes tr {
+        border: 1px solid #e2e8f0;
+        margin-bottom: 0.5rem;
+        border-radius: 0.75rem;
+    }
+
+    .tabla-clientes td {
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    .tabla-clientes td:before {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .tabla-clientes td:nth-of-type(1):before { content: "ID"; }
+    .tabla-clientes td:nth-of-type(2):before { content: "Nombre"; }
+    .tabla-clientes td:nth-of-type(3):before { content: "Dirección"; }
+    .tabla-clientes td:nth-of-type(4):before { content: "Teléfono"; }
+    .tabla-clientes td:nth-of-type(5):before { content: "Género"; }
+    .tabla-clientes td:nth-of-type(6):before { content: "Nacionalidad"; }
+    .tabla-clientes td:nth-of-type(7):before { content: "Acciones"; }
+}

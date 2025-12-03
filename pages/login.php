@@ -22,17 +22,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute([$nombre_usuario]);
         $usuario = $stmt->fetch();
 
-        // Verificar si el usuario existe, si la contraseña es correcta y si el usuario está activo
-        if ($usuario && password_verify($password, $usuario['contraseña'])) {
+        // ADVERTENCIA DE SEGURIDAD CRÍTICA:
+        // Esta aplicación está configurada para usar contraseñas en texto plano.
+        // Esto es EXTREMADAMENTE INSEGURO y NO DEBE USARSE EN UN ENTORNO DE PRODUCCIÓN.
+        // Las contraseñas deben ser hasheadas con password_hash() y verificadas con password_verify().
+        if ($usuario && $password === $usuario['contraseña']) {
             if ($usuario['estado'] == 'activo') {
-                // Regenerar ID de sesión para seguridad
                 session_regenerate_id(true);
-
-                // Guardar datos de sesión
                 $_SESSION['user_id'] = $usuario['id_usuario'];
                 $_SESSION['user_name'] = $usuario['nombre_usuario'];
                 $_SESSION['user_role'] = $usuario['rol'];
-                
                 header("Location: home.php");
                 exit();
             } else {
@@ -65,6 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p class="subtitulo-login">Ingresa tus datos para continuar</p>
             </div>
 
+            <div class="alerta-error" style="padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #ffedd5; color: #9a3412; border: 1px solid #fecaca; font-weight: bold; text-align: center;">
+                ADVERTENCIA DE SEGURIDAD: Este sistema de login utiliza contraseñas en texto plano. NO ES SEGURO.
+            </div>
             <?php if (!empty($error_message)): ?>
                 <div class="alerta-error" style="padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
                     <?php echo $error_message; ?>
@@ -91,6 +93,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <button type="submit" class="boton-primario">
                     Iniciar Sesión
                 </button>
+
+                <div class="enlace-registro">
+                    <p>¿No tienes una cuenta? <a href="registro.php">Regístrate</a></p>
+                </div>
             </form>
         </main>
     </div>

@@ -2,7 +2,7 @@
 include '../includes/auth_check.php';
 include '../includes/conexion.php';
 
-if ($_SESSION['user_role'] !== 'admin') {
+if ($_SESSION['user_role'] !== 'administrador') {
     die("Acceso denegado. Solo los administradores pueden gestionar vehículos.");
 }
 
@@ -138,7 +138,7 @@ if (isset($_SESSION['mensaje_error'])) {
                                             <a href="editar_vehiculo.php?placa=<?php echo htmlspecialchars($vehiculo['placa']); ?>" class="btn-accion-v" title="Editar"><img src="https://api.iconify.design/lucide-pencil.svg?color=%2364748b" width="16"></a>
                                             <form method="POST" action="vehiculos.php" onsubmit="return confirm('¿Estás seguro de que quieres desactivar este vehículo?');" style="display:inline;">
                                                 <input type="hidden" name="placa" value="<?php echo htmlspecialchars($vehiculo['placa']); ?>">
-                                                <button type="submit" name="eliminar_vehiculo" class="btn-accion-v btn-eliminar" title="Eliminar"><img src="https://api.iconify.design/lucide-trash-2.svg?color=%23ef4444" width="16"></button>
+                                                <button type="submit" name="eliminar_vehiculo" class="btn-accion-v btn-eliminar" title="Desactivar"><img src="https://api.iconify.design/lucide-trash-2.svg?color=%23ef4444" width="16"></button>
                                             </form>
                                         </div>
                                     </td>

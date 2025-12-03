@@ -10,7 +10,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
+SET FOREIGN_KEY_CHECKS=0;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `moviapp`
 --
+CREATE DATABASE IF NOT EXISTS `moviapp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `moviapp`;
 
 -- --------------------------------------------------------
 
@@ -222,6 +224,43 @@ CREATE TABLE `VEHICULO` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Volcado de datos para las tablas
+--
+
+INSERT INTO `USUARIO` (`id_usuario`, `nombre_usuario`, `contraseña`, `rol`, `estado`) VALUES
+(1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo');
+
+INSERT INTO `CAT_GENERO` (`id_genero`, `nombre_genero`) VALUES
+(1, 'Masculino'),
+(2, 'Femenino'),
+(3, 'Otro');
+
+INSERT INTO `CAT_NACIONALIDAD` (`id_nacionalidad`, `nombre_nacionalidad`) VALUES
+(1, 'Colombiano'),
+(2, 'Mexicano'),
+(3, 'Argentino');
+
+INSERT INTO `CAT_PAGO` (`id_pago`, `forma_pago`) VALUES
+(1, 'Efectivo'),
+(2, 'Tarjeta de Crédito');
+
+INSERT INTO `TIPO_SERVICIO` (`id_tipo`, `tipo`) VALUES
+(1, 'Pasajeros'),
+(2, 'Alimentos'),
+(3, 'Pasajeros y Alimentos');
+
+INSERT INTO `CAT_CATEGORIA` (`id_categoria`, `nombre_categoria`, `porcentaje_recargo`) VALUES
+(1, 'Normal', '0.00'),
+(2, 'Especial', '15.00'),
+(3, 'Urgente', '30.00');
+
+INSERT INTO `TARIFA_BASE` (`id_tarifa`, `tarifa_base_valor`, `fecha_vigencia`) VALUES
+(1, '5000.00', '2024-01-01');
+
+INSERT INTO `CLIENTE` (`id_cliente`, `nombre`, `direccion`, `id_genero`, `id_nacionalidad`, `id_usuario`) VALUES
+('11223344', 'Cliente de Prueba', 'Calle Falsa 123', 1, 1, 1);
+
+--
 -- Índices para tablas volcadas
 --
 
@@ -345,6 +384,82 @@ ALTER TABLE `VEHICULO`
   ADD KEY `idx_vehiculo_titular` (`id_conductor_titular`);
 
 --
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `CAT_CATEGORIA`
+--
+ALTER TABLE `CAT_CATEGORIA`
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `CAT_GENERO`
+--
+ALTER TABLE `CAT_GENERO`
+  MODIFY `id_genero` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `CAT_NACIONALIDAD`
+--
+ALTER TABLE `CAT_NACIONALIDAD`
+  MODIFY `id_nacionalidad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `CAT_PAGO`
+--
+ALTER TABLE `CAT_PAGO`
+  MODIFY `id_pago` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `FACTURA`
+--
+ALTER TABLE `FACTURA`
+  MODIFY `id_factura` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `FORMAPAGO_FACTURA`
+--
+ALTER TABLE `FORMAPAGO_FACTURA`
+  MODIFY `id_formapago_factura` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `RUTA_SERVICIO`
+--
+ALTER TABLE `RUTA_SERVICIO`
+  MODIFY `id_ruta` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `SERVICIO`
+--
+ALTER TABLE `SERVICIO`
+  MODIFY `id_servicio` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `TARIFA_BASE`
+--
+ALTER TABLE `TARIFA_BASE`
+  MODIFY `id_tarifa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `TELEFONO`
+--
+ALTER TABLE `TELEFONO`
+  MODIFY `id_telefono` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `TIPO_SERVICIO`
+--
+ALTER TABLE `TIPO_SERVICIO`
+  MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `USUARIO`
+--
+ALTER TABLE `USUARIO`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- Restricciones para tablas volcadas
 --
 
@@ -408,30 +523,46 @@ ALTER TABLE `VEHICULO`
   ADD CONSTRAINT `VEHICULO_ibfk_1` FOREIGN KEY (`id_tipo`) REFERENCES `TIPO_SERVICIO` (`id_tipo`),
   ADD CONSTRAINT `VEHICULO_ibfk_2` FOREIGN KEY (`id_conductor_titular`) REFERENCES `CONDUCTOR` (`id_conductor`);
 
---
--- Volcado de datos para la tabla `TIPO_SERVICIO`
---
-INSERT INTO `TIPO_SERVICIO` (`id_tipo`, `tipo`) VALUES
-(1, 'Pasajeros'),
-(2, 'Alimentos'),
-(3, 'Pasajeros y Alimentos');
-
---
--- Volcado de datos para tablas de catálogo y ejemplo
---
-INSERT INTO `CLIENTE` (`id_cliente`, `nombre`, `direccion`, `id_genero`, `id_nacionalidad`, `id_usuario`) VALUES
-('11223344', 'Cliente de Prueba', 'Calle Falsa 123', 1, 1, 1);
-
-INSERT INTO `CAT_CATEGORIA` (`id_categoria`, `nombre_categoria`, `porcentaje_recargo`) VALUES
-(1, 'Normal', '0.00'),
-(2, 'Especial', '15.00'),
-(3, 'Urgente', '30.00');
-
-INSERT INTO `TARIFA_BASE` (`id_tarifa`, `tarifa_base_valor`, `fecha_vigencia`) VALUES
-(1, '5000.00', '2024-01-01');
-
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+DELIMITER //
+
+CREATE TRIGGER trg_prevent_vehicle_assignment_to_inactive_driver
+BEFORE INSERT ON VEHICULO
+FOR EACH ROW
+BEGIN
+    DECLARE conductor_status VARCHAR(50);
+
+    SELECT u.estado INTO conductor_status
+    FROM CONDUCTOR c
+    JOIN USUARIO u ON c.id_usuario = u.id_usuario
+    WHERE c.id_conductor = NEW.id_conductor_titular;
+
+    IF conductor_status = 'inactivo' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede asignar un vehículo a un conductor inactivo.';
+    END IF;
+END //
+
+CREATE TRIGGER trg_prevent_vehicle_update_assignment_to_inactive_driver
+BEFORE UPDATE ON VEHICULO
+FOR EACH ROW
+BEGIN
+    DECLARE conductor_status VARCHAR(50);
+
+    SELECT u.estado INTO conductor_status
+    FROM CONDUCTOR c
+    JOIN USUARIO u ON c.id_usuario = u.id_usuario
+    WHERE c.id_conductor = NEW.id_conductor_titular;
+
+    IF conductor_status = 'inactivo' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede reasignar un vehículo a un conductor inactivo.';
+    END IF;
+END //
+
+DELIMITER ;

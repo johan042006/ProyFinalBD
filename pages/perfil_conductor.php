@@ -3,20 +3,21 @@ include '../includes/auth_check.php';
 include '../includes/conexion.php';
 
 $mensaje_estado = '';
-$conductor_a_editar = null;
-$id_conductor_editar = $_GET['id'] ?? '';
+$conductor_perfil = null;
 
-// Asegurarse de que solo los administradores puedan acceder a esta página
-if ($_SESSION['user_role'] !== 'administrador') {
-    header("Location: home.php"); // Redirigir si no es administrador
+// Asegurarse de que solo los conductores puedan acceder a esta página
+if ($_SESSION['user_role'] !== 'conductor') {
+    header("Location: home.php"); // Redirigir si no es conductor
     exit();
 }
+
+$id_usuario_logueado = $_SESSION['user_id'];
 
 // --- Lógica para obtener datos de catálogos ---
 $generos = $pdo->query("SELECT id_genero, nombre_genero FROM CAT_GENERO")->fetchAll(PDO::FETCH_ASSOC);
 $nacionalidades = $pdo->query("SELECT id_nacionalidad, nombre_nacionalidad FROM CAT_NACIONALIDAD")->fetchAll(PDO::FETCH_ASSOC);
 
-// --- Lógica para manejar POST (Actualizar Conductor) ---
+// --- Lógica para manejar POST (Actualizar Perfil de Conductor) ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_conductor = $_POST['id_conductor'] ?? '';
     $nombre = $_POST['nombre'] ?? '';
@@ -26,7 +27,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_nacionalidad = $_POST['nacionalidad'] ?? '';
     $fotografia_actual = $_POST['fotografia_actual'] ?? null; // Ruta de la foto actual
 
-    if (empty($id_conductor) || empty($nombre) || empty($direccion) || empty($telefono) || empty($id_genero) || empty($id_nacionalidad)) {
+    // Validar que el ID del conductor que se intenta actualizar coincide con el del usuario logueado
+    $stmt_check_id = $pdo->prepare("SELECT id_conductor FROM CONDUCTOR WHERE id_usuario = ?");
+    $stmt_check_id->execute([$id_usuario_logueado]);
+    $conductor_real_id = $stmt_check_id->fetchColumn();
+
+    if ($id_conductor !== $conductor_real_id) {
+        $mensaje_estado = "Error de seguridad: Intento de actualizar un perfil no autorizado.";
+    } elseif (empty($id_conductor) || empty($nombre) || empty($direccion) || empty($telefono) || empty($id_genero) || empty($id_nacionalidad)) {
         $mensaje_estado = "Error: Todos los campos son obligatorios.";
     } else {
         try {
@@ -63,9 +71,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             $pdo->commit();
-            $mensaje_estado = "Conductor actualizado exitosamente.";
+            $mensaje_estado = "Perfil actualizado exitosamente.";
             // Redirigir para evitar reenvío del formulario y mostrar datos actualizados
-            header("Location: editar_conductor.php?id=" . urlencode($id_conductor) . "&status=success");
+            header("Location: perfil_conductor.php?status=success");
             exit();
 
         } catch (PDOException $e) {
@@ -78,22 +86,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// --- Lógica para obtener datos del conductor a editar ---
-if ($id_conductor_editar) {
-    $stmt = $pdo->prepare("SELECT c.*, t.numero AS telefono FROM CONDUCTOR c LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor WHERE c.id_conductor = ?");
-    $stmt->execute([$id_conductor_editar]);
-    $conductor_a_editar = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$conductor_a_editar) {
-        $mensaje_estado = "Error: Conductor no encontrado.";
-        $id_conductor_editar = null; // Invalidar ID para no mostrar formulario de edición vacío
-    }
-} else {
-    $mensaje_estado = "Error: ID de conductor no proporcionado.";
+// --- Lógica para obtener datos del conductor logueado ---
+$stmt = $pdo->prepare("SELECT c.*, t.numero AS telefono FROM CONDUCTOR c LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor WHERE c.id_usuario = ?");
+$stmt->execute([$id_usuario_logueado]);
+$conductor_perfil = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$conductor_perfil) {
+    $mensaje_estado = "Error: No se encontró el perfil de conductor asociado a tu cuenta.";
 }
 
 // Mostrar mensaje de éxito si viene de una redirección
 if (isset($_GET['status']) && $_GET['status'] == 'success') {
-    $mensaje_estado = "Conductor actualizado exitosamente.";
+    $mensaje_estado = "Perfil actualizado exitosamente.";
 }
 
 ?>
@@ -102,7 +106,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Conductor | MoviApp</title>
+    <title>Mi Perfil | MoviApp</title>
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/header.css">
     <link rel="stylesheet" href="../styles/conductores.css"> <!-- Reutilizar estilos de conductores -->
@@ -144,7 +148,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
             color: #334155;
         }
         .form-group input[type="text"],
-        .form-group input[type="file"],
+        .form-group input[type="number"],
         .form-group select {
             padding: 0.75rem;
             border: 1px solid #cbd5e1;
@@ -179,40 +183,40 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
     <?php include '../includes/header.php'; ?>
 
     <main class="contenido-principal">
-        <section class="seccion-editar-conductor">
-            <?php if ($id_conductor_editar && $conductor_a_editar): ?>
+        <section class="seccion-perfil-conductor">
+            <?php if ($conductor_perfil): ?>
                 <div class="form-container">
-                    <h1 class="texto-titulo">Editar Conductor: <?php echo htmlspecialchars($conductor_a_editar['nombre']); ?></h1>
+                    <h1 class="texto-titulo">Mi Perfil de Conductor</h1>
                     <?php if (!empty($mensaje_estado)): ?>
                         <div class="alerta-estado"><?php echo $mensaje_estado; ?></div>
                     <?php endif; ?>
-                    <form action="editar_conductor.php?id=<?php echo urlencode($id_conductor_editar); ?>" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="id_conductor" value="<?php echo htmlspecialchars($conductor_a_editar['id_conductor']); ?>">
-                        <input type="hidden" name="fotografia_actual" value="<?php echo htmlspecialchars($conductor_a_editar['fotografia'] ?? ''); ?>">
+                    <form action="perfil_conductor.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="id_conductor" value="<?php echo htmlspecialchars($conductor_perfil['id_conductor']); ?>">
+                        <input type="hidden" name="fotografia_actual" value="<?php echo htmlspecialchars($conductor_perfil['fotografia'] ?? ''); ?>">
 
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_conductor_display">Identificación</label>
-                                <input type="text" id="id_conductor_display" value="<?php echo htmlspecialchars($conductor_a_editar['id_conductor']); ?>" readonly class="campo-entrada">
+                                <input type="text" id="id_conductor_display" value="<?php echo htmlspecialchars($conductor_perfil['id_conductor']); ?>" readonly class="campo-entrada">
                             </div>
                             <div class="form-group">
                                 <label for="nombre">Nombre Completo</label>
-                                <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($conductor_a_editar['nombre']); ?>" required class="campo-entrada">
+                                <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($conductor_perfil['nombre']); ?>" required class="campo-entrada">
                             </div>
                             <div class="form-group form-full-width">
                                 <label for="direccion">Dirección</label>
-                                <input type="text" id="direccion" name="direccion" value="<?php echo htmlspecialchars($conductor_a_editar['direccion']); ?>" required class="campo-entrada">
+                                <input type="text" id="direccion" name="direccion" value="<?php echo htmlspecialchars($conductor_perfil['direccion']); ?>" required class="campo-entrada">
                             </div>
                             <div class="form-group">
                                 <label for="telefono">Teléfono</label>
-                                <input type="text" id="telefono" name="telefono" value="<?php echo htmlspecialchars($conductor_a_editar['telefono'] ?? ''); ?>" required class="campo-entrada">
+                                <input type="text" id="telefono" name="telefono" value="<?php echo htmlspecialchars($conductor_perfil['telefono'] ?? ''); ?>" required class="campo-entrada">
                             </div>
                             <div class="form-group">
                                 <label for="genero">Género</label>
                                 <select id="genero" name="genero" required class="campo-entrada">
                                     <?php foreach ($generos as $genero): ?>
                                         <option value="<?php echo htmlspecialchars($genero['id_genero']); ?>"
-                                            <?php echo ($conductor_a_editar['id_genero'] == $genero['id_genero']) ? 'selected' : ''; ?>>
+                                            <?php echo ($conductor_perfil['id_genero'] == $genero['id_genero']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($genero['nombre_genero']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -223,7 +227,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
                                 <select id="nacionalidad" name="nacionalidad" required class="campo-entrada">
                                     <?php foreach ($nacionalidades as $nacionalidad): ?>
                                         <option value="<?php echo htmlspecialchars($nacionalidad['id_nacionalidad']); ?>"
-                                            <?php echo ($conductor_a_editar['id_nacionalidad'] == $nacionalidad['id_nacionalidad']) ? 'selected' : ''; ?>>
+                                            <?php echo ($conductor_perfil['id_nacionalidad'] == $nacionalidad['id_nacionalidad']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($nacionalidad['nombre_nacionalidad']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -232,16 +236,16 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
                             <div class="form-group form-full-width">
                                 <label for="fotografia">Cambiar Fotografía</label>
                                 <input type="file" id="fotografia" name="fotografia" accept="image/*" class="campo-entrada">
-                                <?php if ($conductor_a_editar['fotografia']): ?>
+                                <?php if ($conductor_perfil['fotografia']): ?>
                                     <div class="current-photo">
-                                        <img src="../<?php echo htmlspecialchars($conductor_a_editar['fotografia']); ?>" alt="Foto actual">
+                                        <img src="../<?php echo htmlspecialchars($conductor_perfil['fotografia']); ?>" alt="Foto actual">
                                         <span>Foto actual</span>
                                     </div>
                                 <?php endif; ?>
                             </div>
                         </div>
                         <div class="form-actions">
-                            <a href="conductores.php" class="boton-secundario">Cancelar</a>
+                            <a href="home.php" class="boton-secundario">Volver</a>
                             <button type="submit" class="boton-primario">Guardar Cambios</button>
                         </div>
                     </form>
@@ -249,9 +253,9 @@ if (isset($_GET['status']) && $_GET['status'] == 'success') {
             <?php else: ?>
                 <div class="form-container">
                     <h1 class="texto-titulo">Error</h1>
-                    <p class="alerta-estado" style="background-color: #fee2e2; color: #991b1b; border-color: #fecaca;">No se pudo cargar la información del conductor.</p>
+                    <p class="alerta-estado" style="background-color: #fee2e2; color: #991b1b; border-color: #fecaca;">No se pudo cargar la información de tu perfil.</p>
                     <div style="text-align: center; margin-top: 2rem;">
-                        <a href="conductores.php" class="boton-primario" style="width: auto; display: inline-block;">Volver a Conductores</a>
+                        <a href="home.php" class="boton-primario" style="width: auto; display: inline-block;">Volver al Inicio</a>
                     </div>
                 </div>
             <?php endif; ?>
