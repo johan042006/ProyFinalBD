@@ -14,6 +14,12 @@ if ($rol !== 'conductor' && $rol !== 'cliente' && $rol !== 'administrador') {
     exit();
 }
 
+// --- Mensajes de Sesión ---
+if (isset($_SESSION['debug_mensaje'])) {
+    $mensaje_debug = $_SESSION['debug_mensaje'];
+    unset($_SESSION['debug_mensaje']);
+}
+
 try {
     // --- Obtener ID específico del rol (si no es admin) ---
     $id_rol_especifico = null;
@@ -96,23 +102,31 @@ try {
                 $stmt_update_status->execute([$new_status, $service_id_to_update]);
 
                 // 2. Si el nuevo estado es 'completado', generar la factura
-                if ($new_status === 'completado') {
-                    $stmt_check_factura = $pdo->prepare("SELECT id_factura FROM FACTURA WHERE id_servicio = ?");
-                    $stmt_check_factura->execute([$service_id_to_update]);
-                    $factura_existente = $stmt_check_factura->fetchColumn();
-
-                    if ($factura_existente === false) {
-                        $stmt_insert_factura = $pdo->prepare("INSERT INTO FACTURA (id_servicio, total, fecha_emision) VALUES (?, ?, CURDATE())");
-                        $stmt_insert_factura->execute([$service_id_to_update, $servicio_info['valor_total']]);
-                    }
-                }
-
-                $pdo->commit();
-                $mensaje_estado = "Estado del servicio actualizado a '" . htmlspecialchars($new_status) . "'.";
+                            if ($new_status === 'completado') {
+                                $_SESSION['debug_mensaje'] = "Entrando al bloque 'completado'.";
+                                $stmt_check_factura = $pdo->prepare("SELECT id_factura FROM FACTURA WHERE id_servicio = ?");
+                                $stmt_check_factura->execute([$service_id_to_update]);
+                                $factura_existente = $stmt_check_factura->fetchColumn();
                 
-                header("Location: seguimiento.php?service_id=" . urlencode($service_id_to_update));
-                exit();
-
+                                                if ($factura_existente === false) {
+                                                    $_SESSION['debug_mensaje'] .= " No existe factura, creando una nueva.";
+                                                    $stmt_insert_factura = $pdo->prepare("INSERT INTO FACTURA (id_servicio, total, fecha_emision) VALUES (?, ?, CURDATE())");
+                                                    $stmt_insert_factura->execute([$service_id_to_update, $servicio_info['valor_total']]);
+                                                    
+                                                    if ($stmt_insert_factura->rowCount() > 0) {
+                                                        $_SESSION['debug_mensaje'] .= " Inserción de factura exitosa.";
+                                                    } else {
+                                                        $_SESSION['debug_mensaje'] .= " ¡Error! La inserción de la factura no afectó ninguna fila.";
+                                                    }
+                                                } else {
+                                                    $_SESSION['debug_mensaje'] .= " Ya existe una factura, no se crea una nueva.";
+                                                }
+                                            }                
+                            $pdo->commit();
+                            $mensaje_estado = "Estado del servicio actualizado a '" . htmlspecialchars($new_status) . "'.";
+                            
+                            header("Location: seguimiento.php?service_id=" . urlencode($service_id_to_update));
+                            exit();
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 $mensaje_estado = "Error al actualizar el servicio. Código de error: " . $e->getCode() . ". Mensaje: " . $e->getMessage();
@@ -143,6 +157,12 @@ try {
 
     <main class="contenido-principal">
         <section class="seccion-seguimiento">
+
+            <?php if (!empty($mensaje_debug)): ?>
+                <div class="alerta-estado" style="background-color: #fff3cd; color: #856404; border-color: #ffeeba; margin-bottom: 1rem;">
+                    <strong>Mensaje de Depuración:</strong> <?php echo $mensaje_debug; ?>
+                </div>
+            <?php endif; ?>
 
             <?php if (!empty($mensaje_estado)): ?>
                 <div class="alerta-estado">

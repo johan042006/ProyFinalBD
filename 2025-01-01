@@ -1,0 +1,47 @@
+# Explicación Detallada del Proyecto MoviApp
+
+A continuación, se detalla punto por punto cómo la aplicación construida cumple con todos los requisitos del enunciado original.
+
+---
+
+### 1. Registro de Datos de Operación (Clientes, Conductores y Vehículos)
+
+El enunciado pedía registrar clientes, conductores y vehículos.
+
+*   **Clientes:** Se registran con todos los datos solicitados (ID, nombre, etc.) en la tabla `CLIENTE`. La página `registro.php` permite a nuevos usuarios registrarse.
+*   **Conductores:** La tabla `CONDUCTOR` almacena toda su información, incluyendo la foto. El admin los gestiona desde `conductores.php`.
+*   **Vehículos:** La tabla `VEHICULO` guarda la placa, modelo, marca y tipo de servicio. Los conductores pueden registrar sus vehículos en `registrar_vehiculo_conductor.php`.
+
+---
+
+### 2. Registro y Gestión de Servicios
+
+Se requería un sistema para registrar cada servicio con sus detalles.
+
+*   **Registro de Servicio:** El flujo principal de la aplicación permite al cliente, desde la página principal, pedir un viaje, seleccionar un conductor disponible y crear un nuevo servicio que asocia al cliente, conductor y la ruta.
+*   **Categorías y Tarifas:** El cliente puede seleccionar la categoría del servicio (Normal, Especial, Urgente), y el sistema calcula el valor total automáticamente usando una tarifa base y el recargo de la categoría.
+
+---
+
+### 3. Formas de Pago
+
+*   El administrador puede gestionar los métodos de pago disponibles en la página de 'Pagos'.
+*   El cliente puede 'pagar' una factura en la página de la factura, seleccionando uno de los métodos de pago que el administrador haya configurado.
+
+---
+
+### 4. Reportes Mensuales y Anuales
+
+El enunciado pedía un sistema de reportes completo.
+
+*   **Implementación General:** La página 'Reportes' es un dashboard para el administrador con gráficos para cada reporte solicitado. El filtro de fecha permite generar reportes mensuales, anuales o para cualquier período.
+*   **Reportes Específicos:**
+    *   **`Valores totales por tipo y categoría`**: Implementado en el reporte 'Valores por Tipo y Categoría'.
+    *   **`Cantidad de servicios por mes`**: Implementado en el reporte 'Servicios por Mes'.
+    *   **`Datos de los clientes que han solicitado servicios`**: Implementado en el reporte 'Top 5 Clientes por Gasto'.
+    *   **`Valores totales por medio de pago`**: Implementado en el reporte 'Distribución por Medio de Pago'.
+    *   **`"Entre otras…"`**: Para cubrir este punto, se añadieron reportes adicionales como 'Ingresos Anuales', 'Top 5 Conductores' y 'Servicios por Vehículo'.
+
+---
+
+En resumen, cada punto del enunciado ha sido cubierto, resultando en una aplicación completa y funcional.
