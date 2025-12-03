@@ -60,9 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p class="subtitulo-login">Ingresa tus datos para continuar</p>
             </div>
 
-            <div class="alerta-error" style="padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #ffedd5; color: #9a3412; border: 1px solid #fecaca; font-weight: bold; text-align: center;">
-                ADVERTENCIA DE SEGURIDAD: Este sistema de login utiliza contraseñas en texto plano. NO ES SEGURO.
-            </div>
             <?php if (!empty($error_message)): ?>
                 <div class="alerta-error" style="padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
                     <?php echo $error_message; ?>

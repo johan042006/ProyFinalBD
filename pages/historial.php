@@ -8,51 +8,35 @@ $viajes = [];
 $mensaje = '';
 
 try {
-    $sql = "
-        SELECT 
-            s.id_servicio,
-            s.fecha_solicitud, 
-            s.valor_total,
-            r.direccion_origen,
-            r.direccion_destino,
-            cl.nombre as nombre_cliente,
-            co.nombre as nombre_conductor
-        FROM SERVICIO s
-        JOIN RUTA_SERVICIO r ON s.id_servicio = r.id_servicio
-        JOIN CLIENTE cl ON s.id_cliente = cl.id_cliente
-        LEFT JOIN CONDUCTOR co ON s.id_conductor = co.id_conductor
-    ";
+    // Usamos la vista para simplificar la consulta
+    $sql = "SELECT * FROM vista_resumen_servicios";
 
     if ($rol === 'conductor') {
-        // Si es conductor, primero obtenemos su ID de conductor
         $stmt_get_id = $pdo->prepare("SELECT id_conductor FROM CONDUCTOR WHERE id_usuario = ?");
         $stmt_get_id->execute([$id_usuario]);
         $id_conductor_actual = $stmt_get_id->fetchColumn();
 
         if ($id_conductor_actual) {
-            $sql .= " WHERE s.id_conductor = ?";
-            $stmt = $pdo->prepare($sql . " ORDER BY s.fecha_solicitud DESC");
+            $sql .= " WHERE id_conductor_resumen = ?";
+            $stmt = $pdo->prepare($sql . " ORDER BY fecha_solicitud DESC");
             $stmt->execute([$id_conductor_actual]);
         } else {
-            // No se encontró un perfil de conductor para este usuario
             $viajes = [];
         }
-    } elseif ($rol === 'cliente') { // Lógica para clientes
-        // Si es cliente, primero obtenemos su ID de cliente
+    } elseif ($rol === 'cliente') {
         $stmt_get_id = $pdo->prepare("SELECT id_cliente FROM CLIENTE WHERE id_usuario = ?");
         $stmt_get_id->execute([$id_usuario]);
         $id_cliente_actual = $stmt_get_id->fetchColumn();
 
         if ($id_cliente_actual) {
-            $sql .= " WHERE s.id_cliente = ?";
-            $stmt = $pdo->prepare($sql . " ORDER BY s.fecha_solicitud DESC");
+            $sql .= " WHERE id_cliente_resumen = ?";
+            $stmt = $pdo->prepare($sql . " ORDER BY fecha_solicitud DESC");
             $stmt->execute([$id_cliente_actual]);
         } else {
-            // No se encontró un perfil de cliente para este usuario
             $viajes = [];
         }
-    } else { // Para admin, se muestran todos los servicios
-        $stmt = $pdo->prepare($sql . " ORDER BY s.fecha_solicitud DESC");
+    } else { // Para admin
+        $stmt = $pdo->prepare($sql . " ORDER BY fecha_solicitud DESC");
         $stmt->execute();
     }
 
@@ -131,7 +115,9 @@ try {
                                 
                                 <div class="acciones-viaje">
                                     <a href="seguimiento.php?service_id=<?php echo urlencode($viaje['id_servicio']); ?>" class="btn-detalle">Ver detalle</a>
-                                    <a href="factura.php?id_servicio=<?php echo urlencode($viaje['id_servicio']); ?>" class="btn-detalle">Factura</a>
+                                    <?php if ($viaje['estado'] === 'completado'): ?>
+                                        <a href="factura.php?id_servicio=<?php echo urlencode($viaje['id_servicio']); ?>" class="btn-detalle">Factura</a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </article>

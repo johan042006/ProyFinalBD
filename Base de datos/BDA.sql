@@ -109,7 +109,8 @@ CREATE TABLE `FACTURA` (
   `id_factura` int(11) NOT NULL,
   `id_servicio` int(11) NOT NULL,
   `total` decimal(10,2) NOT NULL,
-  `fecha_emision` date NOT NULL
+  `fecha_emision` date NOT NULL,
+  `estado_pago` enum('pendiente','pagado') NOT NULL DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -615,6 +616,29 @@ BEGIN
 END //
 
 DELIMITER ;
+
+CREATE TRIGGER trg_generar_factura_servicio_completado
+AFTER UPDATE ON SERVICIO
+FOR EACH ROW
+BEGIN
+    -- Verificar si el nuevo estado es 'completado' y el estado anterior no lo era
+    IF NEW.estado = 'completado' AND OLD.estado != 'completado' THEN
+        -- Insertar la factura correspondiente
+        INSERT INTO FACTURA (id_servicio, total, fecha_emision)
+        VALUES (NEW.id_servicio, NEW.valor_total, CURDATE());
+    END IF;
+END //
+
+CREATE TRIGGER trg_actualizar_fecha_fin_servicio_completado
+BEFORE UPDATE ON SERVICIO
+FOR EACH ROW
+BEGIN
+    -- Verificar si el nuevo estado es 'completado' y el estado anterior no lo era
+    IF NEW.estado = 'completado' AND OLD.estado != 'completado' THEN
+        -- Actualizar la fecha de finalización del servicio
+        SET NEW.fecha_fin = CURRENT_TIMESTAMP;
+    END IF;
+END //
 
 CREATE VIEW vista_resumen_servicios AS
 SELECT

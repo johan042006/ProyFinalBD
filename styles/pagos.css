@@ -14,7 +14,7 @@
 
 .grid-metodos-pago {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); 
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
     align-items: start; 
 }
@@ -159,6 +159,42 @@
 .btn-billetera:hover {
     background-color: #f1f5f9;
     border-color: #cbd5e1;
+}
+
+/* --- Estilos para la vista de Admin --- */
+.grid-admin-pagos {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid-admin-pagos {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.lista-metodos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista-metodos li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 500;
+}
+.lista-metodos li:last-child {
+    border-bottom: none;
+}
+
+.alerta-estado {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 500;
 }
 
 @media (max-width: 992px) {
