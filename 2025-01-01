@@ -1,47 +1,108 @@
-# Explicación Detallada del Proyecto MoviApp
+# Análisis de la Base de Datos: Consultas, Vistas y Triggers
 
-A continuación, se detalla punto por punto cómo la aplicación construida cumple con todos los requisitos del enunciado original.
+A continuación se presenta un análisis detallado de los componentes clave de la base de datos del proyecto, incluyendo las consultas SQL utilizadas en la aplicación, las vistas predefinidas y los triggers automáticos.
 
----
+## 1. Vistas
 
-### 1. Registro de Datos de Operación (Clientes, Conductores y Vehículos)
+El proyecto utiliza una vista principal para consolidar y simplificar el acceso a la información de los servicios.
 
-El enunciado pedía registrar clientes, conductores y vehículos.
+### `vista_resumen_servicios`
 
-*   **Clientes:** Se registran con todos los datos solicitados (ID, nombre, etc.) en la tabla `CLIENTE`. La página `registro.php` permite a nuevos usuarios registrarse.
-*   **Conductores:** La tabla `CONDUCTOR` almacena toda su información, incluyendo la foto. El admin los gestiona desde `conductores.php`.
-*   **Vehículos:** La tabla `VEHICULO` guarda la placa, modelo, marca y tipo de servicio. Los conductores pueden registrar sus vehículos en `registrar_vehiculo_conductor.php`.
+Esta vista es fundamental para el sistema, ya que une múltiples tablas para crear un resumen completo de cada servicio. Su propósito es evitar la necesidad de escribir complejas uniones (JOINS) repetidamente a lo largo de la aplicación.
 
----
+**Tablas Involucradas:**
+*   `SERVICIO` (tabla principal)
+*   `RUTA_SERVICIO` (para obtener origen y destino)
+*   `CLIENTE` (para obtener el nombre del cliente)
+*   `CONDUCTOR` (para obtener el nombre del conductor)
+*   `VEHICULO` (para obtener detalles del vehículo)
+*   `TIPO_SERVICIO` (para obtener el nombre del tipo de servicio)
+*   `CAT_CATEGORIA` (para obtener el nombre de la categoría)
 
-### 2. Registro y Gestión de Servicios
+**Uso en la Aplicación:**
+*   **`historial.php`**: Utiliza esta vista para mostrar el historial completo de servicios a los administradores, clientes y conductores.
+*   **`seguimiento.php`**: Emplea la vista para que los usuarios puedan ver y seguir el estado de los servicios que no han sido completados o cancelados.
 
-Se requería un sistema para registrar cada servicio con sus detalles.
+## 2. Triggers (Disparadores)
 
-*   **Registro de Servicio:** El flujo principal de la aplicación permite al cliente, desde la página principal, pedir un viaje, seleccionar un conductor disponible y crear un nuevo servicio que asocia al cliente, conductor y la ruta.
-*   **Categorías y Tarifas:** El cliente puede seleccionar la categoría del servicio (Normal, Especial, Urgente), y el sistema calcula el valor total automáticamente usando una tarifa base y el recargo de la categoría.
+Los triggers son procedimientos que se ejecutan automáticamente en respuesta a ciertos eventos en las tablas de la base de datos. El sistema utiliza los siguientes:
 
----
+### Triggers de Validación de Vehículos
 
-### 3. Formas de Pago
+1.  **`trg_prevent_vehicle_assignment_to_inactive_driver`**:
+    *   **Evento**: `BEFORE INSERT` en la tabla `VEHICULO`.
+    *   **Acción**: Antes de registrar un nuevo vehículo, verifica que el conductor titular asignado tenga un estado de 'activo' en la tabla `USUARIO`. Si el conductor está 'inactivo', la operación se bloquea y se muestra un error.
 
-*   El administrador puede gestionar los métodos de pago disponibles en la página de 'Pagos'.
-*   El cliente puede 'pagar' una factura en la página de la factura, seleccionando uno de los métodos de pago que el administrador haya configurado.
+2.  **`trg_prevent_vehicle_update_assignment_to_inactive_driver`**:
+    *   **Evento**: `BEFORE UPDATE` en la tabla `VEHICULO`.
+    *   **Acción**: Similar al anterior, pero se activa al actualizar los datos de un vehículo. Impide que se reasigne un vehículo a un conductor que esté 'inactivo'.
 
----
+### Triggers de Gestión de Servicios y Facturación
 
-### 4. Reportes Mensuales y Anuales
+1.  **`trg_actualizar_fecha_fin_servicio_completado`**:
+    *   **Evento**: `BEFORE UPDATE` en la tabla `SERVICIO`.
+    *   **Acción**: Cuando el estado de un servicio cambia a 'completado', este trigger actualiza automáticamente el campo `fecha_fin` con la fecha y hora actuales (`CURRENT_TIMESTAMP`).
 
-El enunciado pedía un sistema de reportes completo.
+2.  **`trg_generar_factura_servicio_completado`**:
+    *   **Evento**: `AFTER UPDATE` en la tabla `SERVICIO`.
+    *   **Acción**: Inmediatamente después de que un servicio se marca como 'completado', este trigger crea una nueva entrada en la tabla `FACTURA`, utilizando el `id_servicio`, el `valor_total` y la fecha actual. Esto automatiza el proceso de facturación.
 
-*   **Implementación General:** La página 'Reportes' es un dashboard para el administrador con gráficos para cada reporte solicitado. El filtro de fecha permite generar reportes mensuales, anuales o para cualquier período.
-*   **Reportes Específicos:**
-    *   **`Valores totales por tipo y categoría`**: Implementado en el reporte 'Valores por Tipo y Categoría'.
-    *   **`Cantidad de servicios por mes`**: Implementado en el reporte 'Servicios por Mes'.
-    *   **`Datos de los clientes que han solicitado servicios`**: Implementado en el reporte 'Top 5 Clientes por Gasto'.
-    *   **`Valores totales por medio de pago`**: Implementado en el reporte 'Distribución por Medio de Pago'.
-    *   **`"Entre otras…"`**: Para cubrir este punto, se añadieron reportes adicionales como 'Ingresos Anuales', 'Top 5 Conductores' y 'Servicios por Vehículo'.
+## 3. Consultas SQL Principales
 
----
+Las consultas son el corazón de la interacción entre la aplicación PHP y la base de datos. A continuación, se describen las más relevantes por funcionalidad.
 
-En resumen, cada punto del enunciado ha sido cubierto, resultando en una aplicación completa y funcional.
+### Autenticación y Registro (`login.php`, `registro.php`)
+
+*   **Login**: Se realiza una consulta `SELECT` a la tabla `USUARIO` para verificar si el `nombre_usuario` existe y si la contraseña coincide.
+    ```sql
+    SELECT * FROM USUARIO WHERE nombre_usuario = ?
+    ```
+*   **Registro**:
+    1.  Se comprueba que el `nombre_usuario` y el `id_cliente`/`id_conductor` no existan previamente (`SELECT COUNT(*)`).
+    2.  Se inserta un nuevo registro en `USUARIO` (`INSERT INTO USUARIO`).
+    3.  Se inserta la información correspondiente en `CLIENTE` o `CONDUCTOR` (`INSERT INTO CLIENTE` / `INSERT INTO CONDUCTOR`).
+    4.  Se añade el número de teléfono en la tabla `TELEFONO` (`INSERT INTO TELEFONO`).
+
+### Gestión de Perfiles (`perfil_cliente.php`, `perfil_conductor.php`, `configuracion.php`)
+
+*   Se utilizan consultas `SELECT` para obtener los datos del perfil del usuario logueado, uniendo las tablas `CLIENTE`/`CONDUCTOR` con `TELEFONO`.
+*   Se emplean sentencias `UPDATE` para modificar los datos personales (nombre, dirección, etc.) y el número de teléfono. Si el teléfono no existe, se utiliza un `INSERT` en lugar de `UPDATE`.
+    ```sql
+    -- Ejemplo de actualización de cliente
+    UPDATE CLIENTE SET nombre = ?, direccion = ?, id_genero = ?, id_nacionalidad = ? WHERE id_cliente = ?
+    UPDATE TELEFONO SET numero = ? WHERE id_cliente = ?
+    ```
+
+### Gestión de Entidades (`clientes.php`, `conductores.php`, `vehiculos.php`)
+
+*   **Listado**: Se usan consultas `SELECT` con `JOIN` para mostrar listas de clientes, conductores y vehículos con su información relevante (género, nacionalidad, tipo de servicio, etc.).
+*   **Inserción**: Se utilizan sentencias `INSERT` para añadir nuevos registros.
+*   **Actualización**: Se usan `UPDATE` para modificar los datos desde los formularios de edición.
+*   **Eliminación (`clientes.php`)**: Se ejecutan sentencias `DELETE` para eliminar primero las dependencias (en `TELEFONO`) y luego el registro principal en `CLIENTE`.
+*   **Desactivación (`conductores.php`, `vehiculos.php`)**: En lugar de borrar, se utiliza un `UPDATE` para cambiar el estado a 'inactivo', lo cual es una mejor práctica para mantener la integridad de los datos históricos.
+    ```sql
+    UPDATE USUARIO SET estado = 'inactivo' WHERE id_usuario = ?
+    ```
+
+### Flujo Principal de Servicios (`solicitud.php`, `seleccionar_conductor.php`, `seguimiento.php`)
+
+*   **Solicitud de Servicio**: Se crea un nuevo servicio con `INSERT INTO SERVICIO` y su ruta correspondiente con `INSERT INTO RUTA_SERVICIO`. El valor total se calcula en PHP antes de la inserción.
+*   **Selección de Conductor**: Se muestra una lista de conductores activos y disponibles. La consulta excluye a los conductores que ya están en un servicio activo (`asignado` o `en_ruta`).
+    ```sql
+    SELECT c.id_conductor, c.nombre, v.marca, v.modelo, v.placa
+    FROM CONDUCTOR c
+    JOIN VEHICULO v ON c.id_conductor = v.id_conductor_titular
+    WHERE c.id_conductor NOT IN (SELECT s.id_conductor FROM SERVICIO s WHERE s.estado IN ('asignado', 'en_ruta') AND s.id_conductor IS NOT NULL)
+    ```
+*   **Seguimiento**: Se utiliza la `vista_resumen_servicios` para mostrar los detalles del servicio. Los conductores pueden actualizar el estado del servicio (`en_ruta`, `completado`, etc.) mediante una sentencia `UPDATE` en la tabla `SERVICIO`.
+
+### Reportes (`reportes.php`)
+
+Esta sección es intensiva en consultas de agregación para generar estadísticas:
+*   **Valor acumulado por tipo y categoría**: `SUM(f.total)` agrupado por `tipo_servicio` y `categoria`.
+*   **Cantidad de servicios por mes**: `COUNT(s.id_servicio)` agrupado por `mes`.
+*   **Gasto total por cliente**: `SUM(f.total)` agrupado por `nombre_cliente`.
+*   **Uso de formas de pago**: `SUM(f.total)` agrupado por `forma_pago`.
+*   **Ingresos anuales**: `SUM(total)` agrupado por `anio`.
+
+Estas consultas demuestran un uso avanzado de SQL para análisis de negocio, aprovechando funciones como `SUM`, `COUNT`, `DATE_FORMAT` y `GROUP BY`.
