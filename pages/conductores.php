@@ -85,17 +85,16 @@ if ($rol == 'administrador' && $_SERVER["REQUEST_METHOD"] == "POST") {
 if ($rol == 'administrador') {
     $view_mode = 'admin_list';
     try {
+        // Usamos la nueva vista para obtener la lista y disponibilidad de los conductores
         $stmt_conductores = $pdo->query(
-            "SELECT c.id_conductor, c.nombre, c.direccion, c.fotografia, g.nombre_genero, n.nombre_nacionalidad, u.id_usuario, t.numero AS telefono
-             FROM CONDUCTOR c
-             JOIN USUARIO u ON c.id_usuario = u.id_usuario
-             JOIN CAT_GENERO g ON c.id_genero = g.id_genero
-             JOIN CAT_NACIONALIDAD n ON c.id_nacionalidad = n.id_nacionalidad
-             LEFT JOIN TELEFONO t ON c.id_conductor = t.id_conductor
-             WHERE u.estado = 'activo' AND u.rol = 'conductor'
-             ORDER BY c.nombre ASC"
+            "SELECT id_conductor, nombre, direccion, fotografia, nombre_genero, nombre_nacionalidad, id_usuario, telefono, disponibilidad, disponible_en
+             FROM VISTA_CONDUCTORES_DISPONIBILIDAD
+             WHERE estado_usuario = 'activo'
+             ORDER BY nombre ASC"
         );
         $conductores = $stmt_conductores->fetchAll(PDO::FETCH_ASSOC);
+
+        // Estas consultas siguen siendo necesarias para el formulario de "Agregar Conductor"
         $generos = $pdo->query("SELECT * FROM CAT_GENERO")->fetchAll(PDO::FETCH_ASSOC);
         $nacionalidades = $pdo->query("SELECT * FROM CAT_NACIONALIDAD")->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -159,6 +158,9 @@ if (isset($_SESSION['mensaje_error'])) {
         .perfil-info strong { color: #334155; }
         .btn-rojo { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
         .btn-rojo:hover { background-color: #fca5a5; color: #7f1d1d; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; display: inline-block; }
+        .badge-disponible { background-color: #dcfce7; color: #166534; }
+        .badge-ocupado { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
@@ -189,17 +191,29 @@ if (isset($_SESSION['mensaje_error'])) {
                 </div>
                 <div class="contenedor-tabla">
                     <table class="tabla-conductores">
-                        <thead><tr><th class="celda-header">Foto</th><th class="celda-header">Identificación</th><th class="celda-header">Nombre</th><th class="celda-header">Dirección</th><th class="celda-header">Teléfono</th><th class="celda-header">Género</th><th class="celda-header">Nacionalidad</th><th class="celda-header">Acciones</th></tr></thead>
+                        <thead><tr><th class="celda-header">Foto</th><th class="celda-header">Nombre</th><th class="celda-header">Disponibilidad</th><th class="celda-header">Teléfono</th><th class="celda-header">Disponible en</th><th class="celda-header">Acciones</th></tr></thead>
                         <tbody>
                             <?php foreach($conductores as $conductor): ?>
                                 <tr>
                                     <td class="celda"><img src="../<?php echo htmlspecialchars($conductor['fotografia'] ?? 'https://api.iconify.design/iconoir-profile-circle.svg?color=%2364748b'); ?>" alt="Foto" class="foto-tabla"></td>
-                                    <td class="celda"><?php echo htmlspecialchars($conductor['id_conductor']); ?></td>
                                     <td class="celda texto-destacado"><?php echo htmlspecialchars($conductor['nombre']); ?></td>
-                                    <td class="celda"><?php echo htmlspecialchars($conductor['direccion']); ?></td>
+                                    <td class="celda">
+                                        <span class="badge <?php echo $conductor['disponibilidad'] == 'Disponible' ? 'badge-disponible' : 'badge-ocupado'; ?>">
+                                            <?php echo htmlspecialchars($conductor['disponibilidad']); ?>
+                                        </span>
+                                    </td>
                                     <td class="celda"><?php echo htmlspecialchars($conductor['telefono'] ?? 'N/A'); ?></td>
-                                    <td class="celda"><?php echo htmlspecialchars($conductor['nombre_genero']); ?></td>
-                                    <td class="celda"><?php echo htmlspecialchars($conductor['nombre_nacionalidad']); ?></td>
+                                    <td class="celda">
+                                        <?php 
+                                        if ($conductor['disponibilidad'] == 'Ocupado' && !empty($conductor['disponible_en'])) {
+                                            // Formatear la fecha para que sea más legible
+                                            $fecha = new DateTime($conductor['disponible_en']);
+                                            echo $fecha->format('d/m/Y H:i');
+                                        } else {
+                                            echo 'Ahora mismo';
+                                        }
+                                        ?>
+                                    </td>
                                     <td class="celda">
                                         <div class="grupo-acciones">
                                             <a href="editar_conductor.php?id=<?php echo htmlspecialchars($conductor['id_conductor']); ?>" class="btn-accion">Editar</a>

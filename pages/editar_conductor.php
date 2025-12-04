@@ -63,9 +63,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             $pdo->commit();
-            $mensaje_estado = "Conductor actualizado exitosamente.";
-            // Redirigir para evitar reenvío del formulario y mostrar datos actualizados
-            header("Location: editar_conductor.php?id=" . urlencode($id_conductor) . "&status=success");
+            $_SESSION['mensaje_exito'] = "Conductor actualizado exitosamente."; // Usar sesión para el mensaje
+            // Redirigir a la página de conductores para ver la lista actualizada
+            header("Location: conductores.php");
             exit();
 
         } catch (PDOException $e) {
